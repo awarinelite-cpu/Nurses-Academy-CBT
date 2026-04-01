@@ -28,6 +28,56 @@
 //
 // ─────────────────────────────────────────────────────────────────────
 
+// ── Shuffle Utilities ─────────────────────────────────────────────────
+
+/**
+ * Fisher-Yates shuffle — returns a NEW array, does not mutate original.
+ */
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * Shuffles the options of a single parsed question and
+ * updates correctIndex to point to wherever the correct
+ * answer landed after the shuffle.
+ *
+ * Expects question shape:
+ *   { options: string[], correctIndex: number, ... }
+ */
+export function shuffleQuestionOptions(question) {
+  const options = question.options.map(o =>
+    typeof o === 'string' ? o : (o.text || '')
+  );
+
+  if (options.length < 2) return question;
+
+  const correctText = options[question.correctIndex] ?? options[0];
+  const shuffled    = shuffleArray(options);
+  const newIndex    = shuffled.indexOf(correctText);
+
+  return {
+    ...question,
+    options:      shuffled,
+    correctIndex: newIndex >= 0 ? newIndex : 0,
+  };
+}
+
+/**
+ * Shuffles options for every question in an array.
+ * Call this on the parsed result before uploading to Firestore.
+ */
+export function shuffleAllQuestionsOptions(questions) {
+  return questions.map(shuffleQuestionOptions);
+}
+
+// ── Answer Key Parser ─────────────────────────────────────────────────
+
 export function parseAnswerKey(answerText) {
   if (!answerText?.trim()) return {};
   const map = {};
@@ -46,6 +96,8 @@ export function parseAnswerKey(answerText) {
   }
   return map;
 }
+
+// ── Main Parser ───────────────────────────────────────────────────────
 
 export function parseQuestionsFromText(rawText, answerKeyText = '') {
   const answerKey = parseAnswerKey(answerKeyText);
@@ -215,7 +267,7 @@ export function parseQuestionsFromText(rawText, answerKeyText = '') {
 
   // Apply answer key to any without answers
   if (Object.keys(answerKey).length > 0) {
-    questions.forEach((q, i) => {
+    questions.forEach((q) => {
       if (!q._hasAnswer && answerKey[q._qNumber] !== undefined) {
         q.correctIndex = optLetters.indexOf(answerKey[q._qNumber]);
         if (q.correctIndex < 0) q.correctIndex = 0;
