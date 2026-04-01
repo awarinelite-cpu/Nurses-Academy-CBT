@@ -5,24 +5,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper functions ─────────────────────────────────────────
-    function isAuth() { return request.auth != null; }
-    function uid()    { return request.auth.uid; }
-
+    function isAuth()  { return request.auth != null; }
+    function uid()     { return request.auth.uid; }
     function isAdmin() {
       return isAuth() &&
         get(/databases/$(database)/documents/users/$(uid())).data.role == 'admin';
     }
 
-    function isOwner(userId) {
-      return isAuth() && uid() == userId;
-    }
-
     // ── Users ────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read:   if isAuth() && (isOwner(userId) || isAdmin());
-      allow create: if isAuth() && isOwner(userId);
-      allow update: if isAuth() && (isOwner(userId) || isAdmin());
+      allow read:   if isAuth();
+      allow create: if isAuth() && uid() == userId;
+      allow update: if isAuth() && (uid() == userId || isAdmin());
       allow delete: if isAdmin();
     }
 
@@ -34,9 +28,7 @@ service cloud.firestore {
 
     // ── Exam sessions ────────────────────────────────────────────
     match /examSessions/{sessionId} {
-      allow read:   if isAuth() && (
-        resource.data.userId == uid() || isAdmin()
-      );
+      allow read:   if isAuth() && (resource.data.userId == uid() || isAdmin());
       allow create: if isAuth() && request.resource.data.userId == uid();
       allow update: if isAuth() && resource.data.userId == uid();
       allow delete: if isAdmin();
@@ -44,11 +36,11 @@ service cloud.firestore {
 
     // ── Access codes ─────────────────────────────────────────────
     match /accessCodes/{codeId} {
-      allow read:   if isAdmin() || (isAuth() && resource.data.assignedTo == uid());
+      allow read:   if isAuth();
       allow write:  if isAdmin();
     }
 
-    // ── Payment submissions ──────────────────────────────────────
+    // ── Payments ─────────────────────────────────────────────────
     match /payments/{payId} {
       allow read:   if isAuth() && (resource.data.userId == uid() || isAdmin());
       allow create: if isAuth() && request.resource.data.userId == uid();
@@ -58,9 +50,7 @@ service cloud.firestore {
 
     // ── Notifications ────────────────────────────────────────────
     match /notifications/{notifId} {
-      allow read:   if isAuth() && (
-        resource.data.userId == uid() || isAdmin()
-      );
+      allow read:   if isAuth();
       allow create: if isAuth();
       allow update: if isAuth() && (resource.data.userId == uid() || isAdmin());
       allow delete: if isAdmin();
@@ -68,9 +58,10 @@ service cloud.firestore {
 
     // ── Bookmarks ────────────────────────────────────────────────
     match /bookmarks/{bookmarkId} {
-      allow read, write: if isAuth() && resource.data.userId == uid();
-      allow create:      if isAuth() && request.resource.data.userId == uid();
-      allow delete:      if isAuth() && resource.data.userId == uid();
+      allow read:   if isAuth() && (resource.data.userId == uid() || isAdmin());
+      allow create: if isAuth() && request.resource.data.userId == uid();
+      allow update: if isAuth() && resource.data.userId == uid();
+      allow delete: if isAuth() && (resource.data.userId == uid() || isAdmin());
     }
 
     // ── Announcements ────────────────────────────────────────────
