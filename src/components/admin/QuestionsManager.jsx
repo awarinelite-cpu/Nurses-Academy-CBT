@@ -7,7 +7,13 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { NURSING_CATEGORIES, EXAM_TYPES, EXAM_YEARS, DIFFICULTY_LEVELS } from '../../data/categories';
-import { parseQuestionsFromText, validateQuestion, formatQuestionForFirestore } from '../../utils/questionParser';
+import {
+  parseQuestionsFromText,
+  parseAnswerKey,
+  validateQuestion,
+  formatQuestionForFirestore,
+  shuffleAllQuestionsOptions,
+} from '../../utils/questionParser';
 import { useToast } from '../shared/Toast';
 
 export default function QuestionsManager() {
@@ -40,6 +46,7 @@ export default function QuestionsManager() {
   // Bulk paste
   const [bulkText,   setBulkText]   = useState('');
   const [answerText, setAnswerText] = useState('');
+  const [shuffleEnabled, setShuffleEnabled] = useState(true);
   const [bulkMeta,   setBulkMeta]   = useState({
     category: 'general_nursing', examType: 'past_questions',
     year: '2024', subject: '', difficulty: 'medium', source: ''
@@ -91,14 +98,21 @@ export default function QuestionsManager() {
   const handleParse = () => {
     setParseErr(''); setParseInfo('');
     if (!bulkText.trim()) { setParseErr('Paste questions first.'); return; }
-    const parsed = parseQuestionsFromText(bulkText, answerText);
+
+    let parsed = parseQuestionsFromText(bulkText, answerText);
     if (parsed.length === 0) { setParseErr('Could not parse questions. Check the format guide below.'); return; }
+
+    // Shuffle options so correct answers spread across A/B/C/D
+    if (shuffleEnabled) {
+      parsed = shuffleAllQuestionsOptions(parsed);
+    }
 
     const withAnswer    = parsed.filter(q => q._hasAnswer || q.correctIndex >= 0).length;
     const withoutAnswer = parsed.length - withAnswer;
     setParsedQs(parsed);
 
     let info = `Parsed ${parsed.length} questions.`;
+    if (shuffleEnabled) info += ' 🔀 Options shuffled — correct answers spread across A/B/C/D.';
     if (withoutAnswer > 0) info += ` ⚠️ ${withoutAnswer} have no answer — paste answer key or set manually.`;
     setParseInfo(info);
     toast(`${parsed.length} questions parsed!`, 'success');
@@ -411,6 +425,34 @@ export default function QuestionsManager() {
                 <input className="form-input" placeholder="e.g. NMCN 2023" value={bulkMeta.source} onChange={e => setBulkMeta(m=>({...m,source:e.target.value}))} />
               </div>
             </div>
+
+            {/* Shuffle toggle */}
+            <div style={{ marginTop:14, paddingTop:14, borderTop:'1px solid var(--border)', display:'flex', alignItems:'center', gap:12 }}>
+              <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', userSelect:'none' }}>
+                <div
+                  onClick={() => setShuffleEnabled(s => !s)}
+                  style={{
+                    width:44, height:24, borderRadius:12, position:'relative', cursor:'pointer',
+                    background: shuffleEnabled ? 'var(--teal)' : 'var(--border)',
+                    transition:'background 0.2s',
+                  }}
+                >
+                  <div style={{
+                    position:'absolute', top:3, left: shuffleEnabled ? 23 : 3,
+                    width:18, height:18, borderRadius:'50%', background:'#fff',
+                    transition:'left 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.3)',
+                  }} />
+                </div>
+                <span style={{ fontWeight:600, fontSize:14 }}>
+                  🔀 Shuffle answer positions
+                </span>
+              </label>
+              <span style={{ fontSize:12, color:'var(--text-muted)' }}>
+                {shuffleEnabled
+                  ? 'ON — correct answers will be spread across A, B, C, D randomly'
+                  : 'OFF — options stay in original order'}
+              </span>
+            </div>
           </div>
 
           {/* Format guide */}
@@ -468,7 +510,7 @@ export default function QuestionsManager() {
               />
               <div className="form-hint">
                 {answerText
-                  ? `${Object.keys(require('../../utils/questionParser').parseAnswerKey(answerText)).length} answers detected`
+                  ? `${Object.keys(parseAnswerKey(answerText)).length} answers detected`
                   : 'Leave blank if answers are inside question text'}
               </div>
             </div>
