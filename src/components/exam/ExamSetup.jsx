@@ -46,7 +46,7 @@ export default function ExamSetup() {
   const selectedCat = NURSING_CATEGORIES.find(c => c.id === category);
 
   return (
-    <div style={{ padding: 24, maxWidth: 800 }}>
+    <div style={{ padding: '16px', maxWidth: 800 }}>
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontFamily: "'Playfair Display',serif", color: 'var(--text-primary)', marginBottom: 6 }}>
           📝 Set Up Your Exam
@@ -274,7 +274,7 @@ function ToggleRow({ label, desc, checked, onChange }) {
 const styles = {
   grid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 300px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
     gap: 24,
     alignItems: 'start',
   },
@@ -301,7 +301,6 @@ const styles = {
   previewCard: {
     background: 'var(--bg-card)', border: '1.5px solid var(--border)',
     borderRadius: 20, padding: '24px 20px',
-    position: 'sticky', top: 80,
   },
   previewHead: {
     fontFamily: "'Playfair Display',serif", fontWeight: 700,
