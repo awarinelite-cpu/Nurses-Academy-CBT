@@ -17,16 +17,21 @@ import BookmarksPage     from './components/student/BookmarksPage';
 import SubscriptionPage  from './components/student/SubscriptionPage';
 
 // Exam
-import ExamSetup    from './components/exam/ExamSetup';
-import ExamSession  from './components/exam/ExamSession';
+import ExamSetup          from './components/exam/ExamSetup';
+import ExamSession        from './components/exam/ExamSession';
+import CategoryPickerPage from './components/exam/CategoryPickerPage';
+import ExamConfigPage     from './components/exam/ExamConfigPage';
+import DailyPracticePage  from './components/exam/DailyPracticePage';
+import MockExamPage       from './components/exam/MockExamPage';
 
 // Admin pages
-import AdminDashboard       from './components/admin/AdminDashboard';
-import QuestionsManager     from './components/admin/QuestionsManager';
-import UsersManager         from './components/admin/UsersManager';
-import PaymentsManager      from './components/admin/PaymentsManager';
-import AccessCodesManager   from './components/admin/AccessCodesManager';
-import AnnouncementsManager from './components/admin/AnnouncementsManager';
+import AdminDashboard        from './components/admin/AdminDashboard';
+import QuestionsManager      from './components/admin/QuestionsManager';
+import UsersManager          from './components/admin/UsersManager';
+import PaymentsManager       from './components/admin/PaymentsManager';
+import AccessCodesManager    from './components/admin/AccessCodesManager';
+import AnnouncementsManager  from './components/admin/AnnouncementsManager';
+import ScheduledExamsManager from './components/admin/ScheduledExamsManager';
 
 import './styles/global.css';
 
@@ -56,22 +61,27 @@ export default function App() {
                 <Route path="/dashboard"      element={<StudentDashboard />} />
                 <Route path="/exams"          element={<ExamSetup />} />
                 <Route path="/past-questions" element={<ExamSetup />} />
-                <Route path="/mock-exams"     element={<ExamSetup />} />
-                <Route path="/daily-practice" element={<ExamSetup />} />
+                <Route path="/daily-practice" element={<DailyPracticePage />} />
+                <Route path="/mock-exams"     element={<MockExamPage />} />
                 <Route path="/results"        element={<AnalyticsPage />} />
                 <Route path="/bookmarks"      element={<BookmarksPage />} />
                 <Route path="/subscription"   element={<SubscriptionPage />} />
                 <Route path="/leaderboard"    element={<LeaderboardPage />} />
                 <Route path="/profile"        element={<ProfilePage />} />
 
+                {/* Quick action flow */}
+                <Route path="/exam/categories" element={<CategoryPickerPage />} />
+                <Route path="/exam/config"     element={<ExamConfigPage />} />
+
                 {/* Admin */}
-                <Route path="/admin"               element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                <Route path="/admin/questions"     element={<AdminRoute><QuestionsManager /></AdminRoute>} />
-                <Route path="/admin/users"         element={<AdminRoute><UsersManager /></AdminRoute>} />
-                <Route path="/admin/payments"      element={<AdminRoute><PaymentsManager /></AdminRoute>} />
-                <Route path="/admin/access-codes"  element={<AdminRoute><AccessCodesManager /></AdminRoute>} />
-                <Route path="/admin/announcements" element={<AdminRoute><AnnouncementsManager /></AdminRoute>} />
-                <Route path="/admin/analytics"     element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+                <Route path="/admin"                  element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="/admin/questions"        element={<AdminRoute><QuestionsManager /></AdminRoute>} />
+                <Route path="/admin/users"            element={<AdminRoute><UsersManager /></AdminRoute>} />
+                <Route path="/admin/payments"         element={<AdminRoute><PaymentsManager /></AdminRoute>} />
+                <Route path="/admin/access-codes"     element={<AdminRoute><AccessCodesManager /></AdminRoute>} />
+                <Route path="/admin/announcements"    element={<AdminRoute><AnnouncementsManager /></AdminRoute>} />
+                <Route path="/admin/analytics"        element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+                <Route path="/admin/scheduled-exams"  element={<AdminRoute><ScheduledExamsManager /></AdminRoute>} />
               </Route>
 
               {/* 404 */}
