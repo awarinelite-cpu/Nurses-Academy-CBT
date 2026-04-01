@@ -100,7 +100,7 @@ export default function StudentDashboard() {
         <h3 style={styles.sectionTitle}>⚡ Quick Actions</h3>
         <div style={styles.quickGrid}>
           {EXAM_TYPES.map(et => (
-            <Link key={et.id} to={`/exams?type=${et.id}`} style={styles.quickCard}>
+            <Link key={et.id} to={`/exam/categories?type=${et.id}`} style={styles.quickCard}>
               <span style={{ fontSize: 28 }}>{et.icon}</span>
               <span style={{ fontSize: 14, fontWeight: 700 }}>{et.label}</span>
             </Link>
@@ -112,11 +112,11 @@ export default function StudentDashboard() {
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <h3 style={styles.sectionTitle}>🏥 Exam Categories</h3>
-          <Link to="/exams" style={{ color: 'var(--teal)', fontSize: 13, fontWeight: 700 }}>View all →</Link>
+          <Link to="/exam/categories" style={{ color: 'var(--teal)', fontSize: 13, fontWeight: 700 }}>View all →</Link>
         </div>
         <div style={styles.categoriesGrid}>
           {NURSING_CATEGORIES.slice(0, 8).map(cat => (
-            <Link key={cat.id} to={`/exams?category=${cat.id}`} style={styles.catCard}>
+            <Link key={cat.id} to={`/exam/config?category=${cat.id}`} style={styles.catCard}>
               <div style={{ ...styles.catIcon, background: `${cat.color}22` }}>
                 {cat.icon}
               </div>
