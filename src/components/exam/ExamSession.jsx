@@ -34,30 +34,21 @@ export default function ExamSession() {
   useEffect(() => {
     const load = async () => {
       try {
-        let q = query(
-          collection(db, 'questions'),
+        // Strict query — must match exact category + examType + year
+        // No fallback — questions must belong to the exact combination selected
+        let constraints = [
           where('category', '==', category),
-          where('active', '==', true),
-        );
-        if (examType) q = query(q, where('examType', '==', examType));
-        if (year)     q = query(q, where('year', '==', year));
+          where('active',   '==', true),
+          where('examType', '==', examType),
+        ];
+        if (year) constraints.push(where('year', '==', year));
 
+        const q    = query(collection(db, 'questions'), ...constraints);
         const snap = await getDocs(q);
         let qs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         if (doShuffle) qs = qs.sort(() => Math.random() - 0.5);
         qs = qs.slice(0, count);
-
-        if (qs.length === 0) {
-          // Fallback: load any questions for this category
-          const fallbackQ = query(
-            collection(db, 'questions'),
-            where('category', '==', category),
-            where('active', '==', true),
-          );
-          const fallSnap = await getDocs(fallbackQ);
-          qs = fallSnap.docs.map(d => ({ id: d.id, ...d.data() })).slice(0, count);
-        }
 
         setQuestions(qs);
         setPhase(qs.length > 0 ? 'exam' : 'empty');
@@ -185,10 +176,10 @@ Be concise but thorough. Use proper medical terminology.`
       <h3>No questions found</h3>
       <p style={{ color: 'var(--text-muted)', maxWidth: 400 }}>
         {phase === 'error'
-          ? 'Failed to load questions. Check your connection.'
-          : 'No questions available for this combination yet. Admin is uploading content.'}
+          ? 'Failed to load questions. Check your connection and try again.'
+          : `No questions have been uploaded yet for ${examType.replace('_', ' ')}${year ? ` (${year})` : ''} in this category. Please check back later.`}
       </p>
-      <button className="btn btn-primary" onClick={() => navigate('/exams')}>← Back to Setup</button>
+      <button className="btn btn-primary" onClick={() => navigate(-1)}>← Go Back</button>
     </div>
   );
 
