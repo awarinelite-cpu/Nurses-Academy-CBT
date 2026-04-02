@@ -108,7 +108,7 @@ export default function ExamSession() {
     if (!q.question) return;
     setAiLoading(true); setAiExpl('');
     try {
-      const apiKey = 'PASTE_YOUR_NEW_KEY_HERE';
+      const apiKey = 'AIzaSyBBuQ59paVRcAWmz35_hgZ7DKUGFN_HGjg';
       const prompt = `You are an expert NMCN nursing exam tutor. Explain the correct answer to this nursing exam question in a clear, educational way for a nursing student.
 
 Question: ${q.question}
