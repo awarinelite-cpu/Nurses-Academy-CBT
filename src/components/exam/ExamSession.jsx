@@ -123,6 +123,12 @@ Provide a comprehensive explanation (3-5 sentences) covering:
 
 Be concise but thorough. Use proper medical terminology.`;
 
+      if (!apiKey) {
+        setAiExpl('API key not configured. Add VITE_GEMINI_API_KEY to your environment variables.');
+        setAiLoading(false);
+        return;
+      }
+
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
@@ -133,11 +139,31 @@ Be concise but thorough. Use proper medical terminology.`;
           }),
         }
       );
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = errData?.error?.message || `HTTP ${res.status}`;
+        setAiExpl(`Gemini error: ${errMsg}`);
+        setAiLoading(false);
+        return;
+      }
+
       const data = await res.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      setAiExpl(text || 'AI explanation unavailable.');
+
+      if (!text) {
+        // Log full response to console so we can debug
+        console.error('Gemini unexpected response:', JSON.stringify(data));
+        const blocked = data.candidates?.[0]?.finishReason;
+        setAiExpl(blocked
+          ? `Response blocked by Gemini (reason: ${blocked}). Try a different question.`
+          : 'AI explanation unavailable. Check browser console for details.');
+      } else {
+        setAiExpl(text);
+      }
     } catch (e) {
-      setAiExpl(q.explanation || 'No explanation available for this question.');
+      console.error('Gemini fetch error:', e);
+      setAiExpl(q.explanation || 'Network error — check your connection and try again.');
     } finally {
       setAiLoading(false);
     }
