@@ -103,12 +103,12 @@ export default function ExamSession() {
     setPhase('result');
   }, [questions, answers, user, category, examType, year]);
 
-  // ── AI Explanation (Gemini) ─────────────────────────────────────
+  // ── AI Explanation (Groq) ───────────────────────────────────────
   const getAiExplanation = async (q) => {
     if (!q.question) return;
     setAiLoading(true); setAiExpl('');
     try {
-      const apiKey = 'AIzaSyBgap4D5k_6S4WkMhaI5HUqP_Hn9ZIGeFQ';
+      const apiKey = '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';
       const prompt = `You are an expert NMCN nursing exam tutor. Explain the correct answer to this nursing exam question in a clear, educational way for a nursing student.
 
 Question: ${q.question}
@@ -123,18 +123,21 @@ Provide a comprehensive explanation (3-5 sentences) covering:
 
 Be concise but thorough. Use proper medical terminology.`;
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          }),
-        }
-      );
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'llama3-8b-8192',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
       const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const text = data.choices?.[0]?.message?.content;
       setAiExpl(text || 'AI explanation unavailable.');
     } catch (e) {
       setAiExpl(q.explanation || 'No explanation available for this question.');
