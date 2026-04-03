@@ -132,7 +132,7 @@ Be concise but thorough. Use proper medical terminology.`;
           'X-Title': 'NMCN CBT Platform',
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-3-8b-instruct:free',
+          model: 'mistralai/mistral-7b-instruct:free',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 500,
         }),
