@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { NURSING_CATEGORIES, EXAM_TYPES, EXAM_YEARS, DIFFICULTY_LEVELS } from '../../data/categories';
 import { useAuth } from '../../context/AuthContext';
 
-const QUESTION_COUNTS = [10, 20, 30, 50, 100];
+const QUESTION_COUNTS = [10, 20, 30, 50, 100, 200, 250];
 const TIME_OPTIONS = [
   { label: 'No Timer',  value: 0   },
   { label: '30 mins',   value: 30  },
@@ -34,6 +34,7 @@ export default function ExamConfigPage() {
 
   const isPremiumType = (t) => ['hospital_finals', 'topic_drill'].includes(t);
   const needsYear     = ['past_questions', 'hospital_finals'].includes(examType);
+  const isDaily       = examType === 'daily_practice';
 
   const handleStart = () => {
     if (isPremiumType(examType) && !profile?.subscribed) {
@@ -49,6 +50,16 @@ export default function ExamConfigPage() {
     if (year) p.set('year', year);
     navigate(`/exam/session?${p.toString()}`);
   };
+
+  // Preview rows — hide Year for daily practice
+  const previewRows = [
+    ['🏥 Category', cat?.shortLabel || '—'],
+    ['📋 Type',     EXAM_TYPES.find(e => e.id === examType)?.label || '—'],
+    ...(!isDaily ? [['📅 Year', year || (needsYear ? '⚠️ Not selected' : 'N/A')]] : []),
+    ['❓ Questions', count],
+    ['⏱ Time',      timeLimit ? `${timeLimit} mins` : 'Unlimited'],
+    ['🔀 Shuffle',   shuffle ? 'Yes' : 'No'],
+  ];
 
   return (
     <div style={{ padding: '20px 16px', maxWidth: 720, margin: '0 auto' }}>
@@ -121,7 +132,7 @@ export default function ExamConfigPage() {
               return (
                 <button
                   key={et.id}
-                  onClick={() => !locked && setExamType(et.id)}
+                  onClick={() => { if (!locked) { setExamType(et.id); setYear(''); } }}
                   style={{
                     ...styles.typeBtn,
                     borderColor: examType === et.id ? 'var(--teal)' : 'var(--border)',
@@ -139,7 +150,7 @@ export default function ExamConfigPage() {
           </div>
         </div>
 
-        {/* Year (conditional) */}
+        {/* Year — only for past_questions / hospital_finals, never for daily_practice */}
         {needsYear && (
           <div className="card" style={styles.section}>
             <div style={styles.sectionHead}>📅 Exam Year</div>
@@ -184,6 +195,7 @@ export default function ExamConfigPage() {
                   </button>
                 ))}
               </div>
+
             </div>
 
             {/* Time limit */}
@@ -230,14 +242,7 @@ export default function ExamConfigPage() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-            {[
-              ['🏥 Category', cat?.shortLabel || '—'],
-              ['📋 Type',     EXAM_TYPES.find(e => e.id === examType)?.label || '—'],
-              ['📅 Year',     year || (needsYear ? '⚠️ Not selected' : 'N/A')],
-              ['❓ Questions', count],
-              ['⏱ Time',      timeLimit ? `${timeLimit} mins` : 'Unlimited'],
-              ['🔀 Shuffle',   shuffle ? 'Yes' : 'No'],
-            ].map(([k, v]) => (
+            {previewRows.map(([k, v]) => (
               <div key={k} style={{
                 background: 'var(--bg-tertiary)', borderRadius: 10,
                 padding: '10px 12px',
