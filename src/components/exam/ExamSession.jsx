@@ -1,7 +1,11 @@
 // src/components/exam/ExamSession.jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import {
+  collection, query, where, getDocs,
+  addDoc, serverTimestamp, doc, updateDoc,
+  increment, arrayUnion,
+} from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../context/AuthContext';
 import { NURSING_CATEGORIES } from '../../data/categories';
@@ -11,12 +15,13 @@ export default function ExamSession() {
   const [params]  = useSearchParams();
   const navigate  = useNavigate();
 
-  const category   = params.get('category');
-  const examType   = params.get('examType') || 'past_questions';
-  const year       = params.get('year');
-  const count      = parseInt(params.get('count') || '40');
-  const timeLimit  = parseInt(params.get('timeLimit') || '60');
-  const doShuffle  = params.get('shuffle') !== 'false';
+  const category        = params.get('category');
+  const examType        = params.get('examType') || 'past_questions';
+  const year            = params.get('year');
+  const count           = parseInt(params.get('count') || '40');
+  const timeLimit       = parseInt(params.get('timeLimit') || '60');
+  const doShuffle       = params.get('shuffle') !== 'false';
+  const scheduledExamId = params.get('scheduledExamId') || null; // ← used to mark completion
 
   const [questions,  setQuestions]  = useState([]);
   const [current,    setCurrent]    = useState(0);
@@ -27,15 +32,14 @@ export default function ExamSession() {
   const [aiExpl,     setAiExpl]     = useState('');
   const [aiLoading,  setAiLoading]  = useState(false);
   const [sessionId,  setSessionId]  = useState(null);
-  const timerRef = useRef(null);
-  const startedAt = useRef(Date.now());
+  const timerRef   = useRef(null);
+  const startedAt  = useRef(Date.now());
+  const submitted  = useRef(false); // guard against double-submit
 
   // ── Load questions ──────────────────────────────────────────────
   useEffect(() => {
     const load = async () => {
       try {
-        // Strict query — must match exact category + examType + year
-        // No fallback — questions must belong to the exact combination selected
         let constraints = [
           where('category', '==', category),
           where('active',   '==', true),
@@ -73,37 +77,62 @@ export default function ExamSession() {
     return () => clearInterval(timerRef.current);
   }, [phase, timeLimit]);
 
+  // ── Submit ──────────────────────────────────────────────────────
   const submitExam = useCallback(async () => {
+    if (submitted.current) return;
+    submitted.current = true;
     clearInterval(timerRef.current);
+
     const correct = questions.filter((q, i) => answers[i] === q.correctIndex).length;
     const score   = questions.length > 0 ? Math.round((correct / questions.length) * 100) : 0;
     const elapsed = Math.round((Date.now() - startedAt.current) / 1000);
 
-    // Save to Firestore
     try {
+      // 1. Save full session record
       const sessionData = {
-        userId: user.uid, category, examType, year: year || null,
-        totalQuestions: questions.length, correct, wrong: questions.length - correct,
-        scorePercent: score, timeTakenSeconds: elapsed,
+        userId:         user.uid,
+        category,
+        examType,
+        scheduledExamId: scheduledExamId || null,
+        year:           year || null,
+        totalQuestions: questions.length,
+        correct,
+        wrong:          questions.length - correct,
+        scorePercent:   score,
+        timeTakenSeconds: elapsed,
         answers: Object.entries(answers).map(([i, a]) => ({
-          questionId: questions[i]?.id,
+          questionId:    questions[i]?.id,
           selectedIndex: a,
-          correct: a === questions[i]?.correctIndex,
+          correct:       a === questions[i]?.correctIndex,
         })),
         completedAt: serverTimestamp(),
       };
       const ref = await addDoc(collection(db, 'examSessions'), sessionData);
       setSessionId(ref.id);
-      // Update user stats
-      await updateDoc(doc(db, 'users', user.uid), {
-        totalExams: increment(1),
-        totalScore: increment(score),
-      });
-    } catch (e) { console.error(e); }
-    setPhase('result');
-  }, [questions, answers, user, category, examType, year]);
 
-  // ── AI Explanation (OpenRouter) ─────────────────────────────────
+      // 2. Update user profile stats + mark this scheduled exam as completed
+      const userUpdate = {
+        totalExams:  increment(1),
+        totalScore:  increment(score),
+      };
+
+      // If this was a scheduled exam (daily_practice or mock_exam),
+      // add its ID to completedExams[] and save the score
+      if (scheduledExamId) {
+        userUpdate[`examScores.${scheduledExamId}`] = score;   // scores map
+        userUpdate.completedExams = arrayUnion(scheduledExamId); // completed list
+      }
+
+      await updateDoc(doc(db, 'users', user.uid), userUpdate);
+
+    } catch (e) {
+      console.error('submitExam error:', e);
+    }
+
+    setPhase('result');
+  }, [questions, answers, user, category, examType, year, scheduledExamId]);
+
+  // ── AI Explanation ──────────────────────────────────────────────
   const getAiExplanation = async (q) => {
     if (!q.question) return;
     setAiLoading(true); setAiExpl('');
@@ -148,7 +177,7 @@ Be concise but thorough. Use proper medical terminology.`;
   };
 
   const handleAnswer = (optIdx) => {
-    if (answers[current] !== undefined) return; // already answered
+    if (answers[current] !== undefined) return;
     setAnswers(prev => ({ ...prev, [current]: optIdx }));
   };
 
@@ -160,7 +189,6 @@ Be concise but thorough. Use proper medical terminology.`;
     });
   };
 
-  // ── Render helpers ───────────────────────────────────────────────
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60).toString().padStart(2, '0');
     const s = (secs % 60).toString().padStart(2, '0');
@@ -169,6 +197,7 @@ Be concise but thorough. Use proper medical terminology.`;
 
   const timerClass = timeLeft < 60 ? 'timer-danger' : timeLeft < 300 ? 'timer-warning' : '';
 
+  // ── Phase screens ───────────────────────────────────────────────
   if (phase === 'loading') return (
     <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: 16 }}>
       <div className="spinner" />
@@ -190,7 +219,16 @@ Be concise but thorough. Use proper medical terminology.`;
   );
 
   if (phase === 'result') {
-    return <ExamResult questions={questions} answers={answers} sessionId={sessionId} navigate={navigate} />;
+    return (
+      <ExamResult
+        questions={questions}
+        answers={answers}
+        sessionId={sessionId}
+        scheduledExamId={scheduledExamId}
+        examType={examType}
+        navigate={navigate}
+      />
+    );
   }
 
   const q       = questions[current];
@@ -369,13 +407,16 @@ Be concise but thorough. Use proper medical terminology.`;
 }
 
 // ── Results screen ──────────────────────────────────────────────────
-function ExamResult({ questions, answers, sessionId, navigate }) {
+function ExamResult({ questions, answers, sessionId, scheduledExamId, examType, navigate }) {
   const correct = questions.filter((q, i) => answers[i] === q.correctIndex).length;
   const total   = questions.length;
   const score   = total > 0 ? Math.round((correct / total) * 100) : 0;
   const pass    = score >= 50;
 
   const [reviewing, setReviewing] = useState(false);
+
+  // Where to go when student wants to see their reviews
+  const reviewsRoute = examType === 'mock_exam' ? '/mock-reviews' : '/daily-reviews';
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: 24 }}>
@@ -393,9 +434,9 @@ function ExamResult({ questions, answers, sessionId, navigate }) {
         </div>
         <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', gap: 24 }}>
           {[
-            { label: 'Correct', value: correct, color: '#4ADE80' },
-            { label: 'Wrong',   value: total - correct, color: '#F87171' },
-            { label: 'Skipped', value: total - Object.keys(answers).length, color: '#FCD34D' },
+            { label: 'Correct', value: correct,                              color: '#4ADE80' },
+            { label: 'Wrong',   value: total - correct,                      color: '#F87171' },
+            { label: 'Skipped', value: total - Object.keys(answers).length,  color: '#FCD34D' },
           ].map(s => (
             <div key={s.label} style={{ textAlign: 'center' }}>
               <div style={{ fontWeight: 700, fontSize: 22, color: s.color }}>{s.value}</div>
@@ -409,6 +450,12 @@ function ExamResult({ questions, answers, sessionId, navigate }) {
         <button className="btn btn-primary" onClick={() => setReviewing(!reviewing)}>
           {reviewing ? '🔼 Hide Review' : '📖 Review Answers'}
         </button>
+        {/* Go to the correct review storage page */}
+        {scheduledExamId && (
+          <button className="btn btn-outline" onClick={() => navigate(reviewsRoute)}>
+            {examType === 'mock_exam' ? '🗂️ Mock Reviews' : '📖 Daily Reviews'}
+          </button>
+        )}
         <button className="btn btn-secondary" onClick={() => navigate('/exams')}>
           🔄 New Exam
         </button>
