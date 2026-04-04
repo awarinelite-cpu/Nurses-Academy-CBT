@@ -17,12 +17,14 @@ import BookmarksPage     from './components/student/BookmarksPage';
 import SubscriptionPage  from './components/student/SubscriptionPage';
 
 // Exam
-import ExamSetup          from './components/exam/ExamSetup';
-import ExamSession        from './components/exam/ExamSession';
-import CategoryPickerPage from './components/exam/CategoryPickerPage';
-import ExamConfigPage     from './components/exam/ExamConfigPage';
-import DailyPracticePage  from './components/exam/DailyPracticePage';
-import MockExamPage       from './components/exam/MockExamPage';
+import ExamSetup               from './components/exam/ExamSetup';
+import ExamSession             from './components/exam/ExamSession';
+import CategoryPickerPage      from './components/exam/CategoryPickerPage';
+import ExamConfigPage          from './components/exam/ExamConfigPage';
+import DailyPracticePage       from './components/exam/DailyPracticePage';
+import MockExamPage            from './components/exam/MockExamPage';
+import DailyReviewStoragePage  from './components/exam/DailyReviewStoragePage';
+import MockReviewStoragePage   from './components/exam/MockReviewStoragePage';
 
 // Admin pages
 import AdminDashboard        from './components/admin/AdminDashboard';
@@ -62,7 +64,9 @@ export default function App() {
                 <Route path="/exams"          element={<ExamSetup />} />
                 <Route path="/past-questions" element={<ExamSetup />} />
                 <Route path="/daily-practice" element={<DailyPracticePage />} />
+                <Route path="/daily-reviews"  element={<DailyReviewStoragePage />} />
                 <Route path="/mock-exams"     element={<MockExamPage />} />
+                <Route path="/mock-reviews"   element={<MockReviewStoragePage />} />
                 <Route path="/results"        element={<AnalyticsPage />} />
                 <Route path="/bookmarks"      element={<BookmarksPage />} />
                 <Route path="/subscription"   element={<SubscriptionPage />} />
