@@ -6,7 +6,7 @@ import {
   query, where, orderBy, serverTimestamp, writeBatch
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { NURSING_CATEGORIES, EXAM_TYPES, EXAM_YEARS, DIFFICULTY_LEVELS } from '../../data/categories';
+import { NURSING_CATEGORIES, EXAM_TYPES, EXAM_YEARS, DIFFICULTY_LEVELS, DEFAULT_NURSING_COURSES } from '../../data/categories';
 import {
   parseQuestionsFromText,
   parseAnswerKey,
@@ -40,6 +40,7 @@ export default function QuestionsManager() {
     question: '', options: ['', '', '', ''], correctIndex: 0,
     explanation: '', category: 'general_nursing', examType: 'past_questions',
     year: '2024', subject: '', difficulty: 'medium', source: '', tags: '',
+    topic: '', course: '',
   };
   const [form, setForm] = useState({ ...BLANK });
 
@@ -49,7 +50,8 @@ export default function QuestionsManager() {
   const [shuffleEnabled, setShuffleEnabled] = useState(true);
   const [bulkMeta,   setBulkMeta]   = useState({
     category: 'general_nursing', examType: 'past_questions',
-    year: '2024', subject: '', difficulty: 'medium', source: ''
+    year: '2024', subject: '', difficulty: 'medium', source: '',
+    topic: '', course: '',
   });
   const [parsedQs,  setParsedQs]  = useState([]);
   const [parseErr,  setParseErr]  = useState('');
@@ -230,7 +232,7 @@ export default function QuestionsManager() {
                   <thead>
                     <tr>
                       <th><input type="checkbox" onChange={toggleAll} checked={pageQs.length > 0 && pageQs.every(q => selected.has(q.id))} /></th>
-                      <th>#</th><th>Question</th><th>Category</th><th>Type</th><th>Year</th><th>Diff.</th><th>Actions</th>
+                      <th>#</th><th>Question</th><th>Category</th><th>Type</th><th>Topic / Course</th><th>Year</th><th>Diff.</th><th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -246,6 +248,9 @@ export default function QuestionsManager() {
                           </td>
                           <td><span style={{ fontSize: 15 }}>{cat?.icon}</span> <span style={{ fontSize: 12 }}>{cat?.shortLabel}</span></td>
                           <td><span className="badge badge-blue" style={{ fontSize: 10 }}>{q.examType}</span></td>
+                          <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                            {q.topic ? <span>🎯 {q.topic}</span> : q.course ? <span>📖 {DEFAULT_NURSING_COURSES.find(c=>c.id===q.course)?.label || q.course}</span> : '—'}
+                          </td>
                           <td style={{ fontSize: 13 }}>{q.year || '—'}</td>
                           <td><span className={`badge ${q.difficulty === 'easy' ? 'badge-green' : q.difficulty === 'hard' ? 'badge-red' : 'badge-gold'}`} style={{ fontSize: 10 }}>{q.difficulty}</span></td>
                           <td>
@@ -310,6 +315,17 @@ export default function QuestionsManager() {
               <div className="form-group">
                 <label className="form-label">Source</label>
                 <input className="form-input" placeholder="e.g. NMCN 2023" value={form.source} onChange={e => setForm(f=>({...f,source:e.target.value}))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Topic <span style={{fontSize:11,color:'var(--text-muted)'}}>for Topic Drill</span></label>
+                <input className="form-input" placeholder="e.g. Cardiac Arrhythmias" value={form.topic} onChange={e => setForm(f=>({...f,topic:e.target.value}))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Course <span style={{fontSize:11,color:'var(--text-muted)'}}>for Course Drill</span></label>
+                <select className="form-input form-select" value={form.course} onChange={e => setForm(f=>({...f,course:e.target.value}))}>
+                  <option value="">— Select Course —</option>
+                  {DEFAULT_NURSING_COURSES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                </select>
               </div>
             </div>
 
@@ -423,6 +439,17 @@ export default function QuestionsManager() {
               <div className="form-group">
                 <label className="form-label">Source</label>
                 <input className="form-input" placeholder="e.g. NMCN 2023" value={bulkMeta.source} onChange={e => setBulkMeta(m=>({...m,source:e.target.value}))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Topic <span style={{fontSize:11,color:'var(--text-muted)'}}>for Topic Drill</span></label>
+                <input className="form-input" placeholder="e.g. Cardiac Arrhythmias" value={bulkMeta.topic} onChange={e => setBulkMeta(m=>({...m,topic:e.target.value}))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Course <span style={{fontSize:11,color:'var(--text-muted)'}}>for Course Drill</span></label>
+                <select className="form-input form-select" value={bulkMeta.course} onChange={e => setBulkMeta(m=>({...m,course:e.target.value}))}>
+                  <option value="">— Select Course —</option>
+                  {DEFAULT_NURSING_COURSES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                </select>
               </div>
             </div>
 
