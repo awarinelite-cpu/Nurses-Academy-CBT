@@ -47,12 +47,14 @@ export default function AdminDashboard() {
   ];
 
   const QUICK_ACTIONS = [
-    { label: 'Add Question',      icon: '➕', to: '/admin/questions?action=add',      color: '#0D9488' },
-    { label: 'Bulk Upload',       icon: '📤', to: '/admin/questions?action=bulk',     color: '#2563EB' },
-    { label: 'Manage Users',      icon: '👥', to: '/admin/users',                    color: '#7C3AED' },
-    { label: 'Access Codes',      icon: '🔑', to: '/admin/access-codes',             color: '#F59E0B' },
-    { label: 'Announcements',     icon: '📢', to: '/admin/announcements',            color: '#EF4444' },
-    { label: 'Confirm Payments',  icon: '✅', to: '/admin/payments',                 color: '#16A34A' },
+    { label: 'Add Question',      icon: '➕', to: '/admin/questions?action=add',  color: '#0D9488' },
+    { label: 'Bulk Upload',       icon: '📤', to: '/admin/questions?action=bulk', color: '#2563EB' },
+    { label: 'Manage Users',      icon: '👥', to: '/admin/users',                color: '#7C3AED' },
+    { label: 'Access Codes',      icon: '🔑', to: '/admin/access-codes',         color: '#F59E0B' },
+    { label: 'Announcements',     icon: '📢', to: '/admin/announcements',        color: '#EF4444' },
+    { label: 'Confirm Payments',  icon: '✅', to: '/admin/payments',             color: '#16A34A' },
+    { label: 'Manage Courses',    icon: '📖', to: '/admin/courses',              color: '#0891B2' },
+    { label: 'Scheduled Exams',   icon: '📅', to: '/admin/scheduled-exams',     color: '#A855F7' },
   ];
 
   return (
