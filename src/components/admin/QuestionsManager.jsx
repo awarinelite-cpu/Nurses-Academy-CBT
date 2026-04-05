@@ -296,37 +296,47 @@ export default function QuestionsManager() {
                   {EXAM_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Year</label>
-                <select className="form-input form-select" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))}>
-                  {EXAM_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
-              </div>
+              {!['topic_drill','course_drill'].includes(form.examType) && (
+                <div className="form-group">
+                  <label className="form-label">Year</label>
+                  <select className="form-input form-select" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))}>
+                    {EXAM_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+              )}
               <div className="form-group">
                 <label className="form-label">Difficulty</label>
                 <select className="form-input form-select" value={form.difficulty} onChange={e => setForm(f=>({...f,difficulty:e.target.value}))}>
                   {DIFFICULTY_LEVELS.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Subject</label>
-                <input className="form-input" placeholder="e.g. Pharmacology" value={form.subject} onChange={e => setForm(f=>({...f,subject:e.target.value}))} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Source</label>
-                <input className="form-input" placeholder="e.g. NMCN 2023" value={form.source} onChange={e => setForm(f=>({...f,source:e.target.value}))} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Topic <span style={{fontSize:11,color:'var(--text-muted)'}}>for Topic Drill</span></label>
-                <input className="form-input" placeholder="e.g. Cardiac Arrhythmias" value={form.topic} onChange={e => setForm(f=>({...f,topic:e.target.value}))} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Course <span style={{fontSize:11,color:'var(--text-muted)'}}>for Course Drill</span></label>
-                <select className="form-input form-select" value={form.course} onChange={e => setForm(f=>({...f,course:e.target.value}))}>
-                  <option value="">— Select Course —</option>
-                  {DEFAULT_NURSING_COURSES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                </select>
-              </div>
+              {!['topic_drill','course_drill'].includes(form.examType) && (
+                <div className="form-group">
+                  <label className="form-label">Subject</label>
+                  <input className="form-input" placeholder="e.g. Pharmacology" value={form.subject} onChange={e => setForm(f=>({...f,subject:e.target.value}))} />
+                </div>
+              )}
+              {!['topic_drill','course_drill'].includes(form.examType) && (
+                <div className="form-group">
+                  <label className="form-label">Source</label>
+                  <input className="form-input" placeholder="e.g. NMCN 2023" value={form.source} onChange={e => setForm(f=>({...f,source:e.target.value}))} />
+                </div>
+              )}
+              {form.examType === 'topic_drill' && (
+                <div className="form-group">
+                  <label className="form-label">Topic *</label>
+                  <input className="form-input" placeholder="e.g. Cardiac Arrhythmias" value={form.topic} onChange={e => setForm(f=>({...f,topic:e.target.value}))} />
+                </div>
+              )}
+              {form.examType === 'course_drill' && (
+                <div className="form-group">
+                  <label className="form-label">Course *</label>
+                  <select className="form-input form-select" value={form.course} onChange={e => setForm(f=>({...f,course:e.target.value}))}>
+                    <option value="">— Select Course —</option>
+                    {DEFAULT_NURSING_COURSES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -420,37 +430,47 @@ export default function QuestionsManager() {
                   {EXAM_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Year</label>
-                <select className="form-input form-select" value={bulkMeta.year} onChange={e => setBulkMeta(m=>({...m,year:e.target.value}))}>
-                  {EXAM_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
-              </div>
+              {!['topic_drill','course_drill'].includes(bulkMeta.examType) && (
+                <div className="form-group">
+                  <label className="form-label">Year</label>
+                  <select className="form-input form-select" value={bulkMeta.year} onChange={e => setBulkMeta(m=>({...m,year:e.target.value}))}>
+                    {EXAM_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+              )}
               <div className="form-group">
                 <label className="form-label">Difficulty</label>
                 <select className="form-input form-select" value={bulkMeta.difficulty} onChange={e => setBulkMeta(m=>({...m,difficulty:e.target.value}))}>
                   {DIFFICULTY_LEVELS.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Subject</label>
-                <input className="form-input" placeholder="e.g. Medical-Surgical" value={bulkMeta.subject} onChange={e => setBulkMeta(m=>({...m,subject:e.target.value}))} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Source</label>
-                <input className="form-input" placeholder="e.g. NMCN 2023" value={bulkMeta.source} onChange={e => setBulkMeta(m=>({...m,source:e.target.value}))} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Topic <span style={{fontSize:11,color:'var(--text-muted)'}}>for Topic Drill</span></label>
-                <input className="form-input" placeholder="e.g. Cardiac Arrhythmias" value={bulkMeta.topic} onChange={e => setBulkMeta(m=>({...m,topic:e.target.value}))} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Course <span style={{fontSize:11,color:'var(--text-muted)'}}>for Course Drill</span></label>
-                <select className="form-input form-select" value={bulkMeta.course} onChange={e => setBulkMeta(m=>({...m,course:e.target.value}))}>
-                  <option value="">— Select Course —</option>
-                  {DEFAULT_NURSING_COURSES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                </select>
-              </div>
+              {!['topic_drill','course_drill'].includes(bulkMeta.examType) && (
+                <div className="form-group">
+                  <label className="form-label">Subject</label>
+                  <input className="form-input" placeholder="e.g. Medical-Surgical" value={bulkMeta.subject} onChange={e => setBulkMeta(m=>({...m,subject:e.target.value}))} />
+                </div>
+              )}
+              {!['topic_drill','course_drill'].includes(bulkMeta.examType) && (
+                <div className="form-group">
+                  <label className="form-label">Source</label>
+                  <input className="form-input" placeholder="e.g. NMCN 2023" value={bulkMeta.source} onChange={e => setBulkMeta(m=>({...m,source:e.target.value}))} />
+                </div>
+              )}
+              {bulkMeta.examType === 'topic_drill' && (
+                <div className="form-group">
+                  <label className="form-label">Topic *</label>
+                  <input className="form-input" placeholder="e.g. Cardiac Arrhythmias" value={bulkMeta.topic} onChange={e => setBulkMeta(m=>({...m,topic:e.target.value}))} />
+                </div>
+              )}
+              {bulkMeta.examType === 'course_drill' && (
+                <div className="form-group">
+                  <label className="form-label">Course *</label>
+                  <select className="form-input form-select" value={bulkMeta.course} onChange={e => setBulkMeta(m=>({...m,course:e.target.value}))}>
+                    <option value="">— Select Course —</option>
+                    {DEFAULT_NURSING_COURSES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Shuffle toggle */}
