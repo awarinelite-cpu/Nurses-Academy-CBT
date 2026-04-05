@@ -8,10 +8,11 @@ import { NURSING_CATEGORIES, EXAM_TYPES } from '../../data/categories';
 
 // Extra quick-action cards that link to review/drill pages
 const REVIEW_ACTIONS = [
-  { id: 'daily-reviews',       to: '/daily-reviews',       icon: '📖', label: 'Daily Reviews'       },
-  { id: 'mock-reviews',        to: '/mock-reviews',        icon: '🗂️', label: 'Mock Reviews'        },
-  { id: 'course-drill',        to: '/course-drill',        icon: '📚', label: 'Course Drill'        },
-  { id: 'topic-drill-archive', to: '/topic-drill-archive', icon: '🎯', label: 'Topic Drill Archive' },
+  { id: 'daily-reviews',        to: '/daily-reviews',        icon: '📖', label: 'Daily Reviews'        },
+  { id: 'mock-reviews',         to: '/mock-reviews',         icon: '🗂️', label: 'Mock Reviews'         },
+  { id: 'course-drill',         to: '/course-drill',         icon: '📚', label: 'Course Drill'         },
+  { id: 'course-drill-archive', to: '/course-drill-archive', icon: '🗃️', label: 'Course Drill Archive' },
+  { id: 'topic-drill-archive',  to: '/topic-drill-archive',  icon: '🎯', label: 'Topic Drill Archive'  },
 ];
 
 export default function StudentDashboard() {
