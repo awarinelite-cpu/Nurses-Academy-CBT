@@ -27,6 +27,7 @@ import DailyReviewStoragePage  from './components/exam/DailyReviewStoragePage';
 import MockReviewStoragePage   from './components/exam/MockReviewStoragePage';
 import CourseDrillPage         from './components/exam/CourseDrillPage';
 import TopicDrillArchivePage   from './components/exam/TopicDrillArchivePage';
+import CourseDrillArchivePage  from './components/exam/CourseDrillArchivePage';
 
 // Admin pages
 import AdminDashboard        from './components/admin/AdminDashboard';
@@ -36,6 +37,7 @@ import PaymentsManager       from './components/admin/PaymentsManager';
 import AccessCodesManager    from './components/admin/AccessCodesManager';
 import AnnouncementsManager  from './components/admin/AnnouncementsManager';
 import ScheduledExamsManager from './components/admin/ScheduledExamsManager';
+import CoursesManager        from './components/admin/CoursesManager';
 
 import './styles/global.css';
 
@@ -71,6 +73,7 @@ export default function App() {
                 <Route path="/mock-reviews"          element={<MockReviewStoragePage />} />
                 <Route path="/course-drill"          element={<CourseDrillPage />} />
                 <Route path="/topic-drill-archive"   element={<TopicDrillArchivePage />} />
+                <Route path="/course-drill-archive"  element={<CourseDrillArchivePage />} />
                 <Route path="/results"        element={<AnalyticsPage />} />
                 <Route path="/bookmarks"      element={<BookmarksPage />} />
                 <Route path="/subscription"   element={<SubscriptionPage />} />
@@ -90,6 +93,7 @@ export default function App() {
                 <Route path="/admin/announcements"    element={<AdminRoute><AnnouncementsManager /></AdminRoute>} />
                 <Route path="/admin/analytics"        element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
                 <Route path="/admin/scheduled-exams"  element={<AdminRoute><ScheduledExamsManager /></AdminRoute>} />
+                <Route path="/admin/courses"          element={<AdminRoute><CoursesManager /></AdminRoute>} />
               </Route>
 
               {/* 404 */}
