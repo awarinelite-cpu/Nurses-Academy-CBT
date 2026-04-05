@@ -160,11 +160,26 @@ export const NURSING_CATEGORIES = [
 export const EXAM_YEARS = ['2020', '2021', '2022', '2023', '2024', '2025'];
 
 export const EXAM_TYPES = [
-  { id: 'past_questions', label: 'NMCN Past Questions', icon: '📚' },
-  { id: 'hospital_finals', label: 'Hospital Final Exams', icon: '🏨' },
-  { id: 'mock_exam', label: 'Mock Examination', icon: '📝' },
-  { id: 'daily_practice', label: 'Daily Practice Quiz', icon: '⚡' },
-  { id: 'topic_drill', label: 'Topic Drill', icon: '🎯' },
+  { id: 'past_questions',  label: 'NMCN Past Questions',  icon: '📚' },
+  { id: 'hospital_finals', label: 'Hospital Final Exams',  icon: '🏨' },
+  { id: 'mock_exam',       label: 'Mock Examination',      icon: '📝' },
+  { id: 'daily_practice',  label: 'Daily Practice Quiz',   icon: '⚡' },
+  { id: 'topic_drill',     label: 'Topic Drill',           icon: '🎯' },
+  { id: 'course_drill',    label: 'Course Drill',          icon: '📖' },
+];
+
+// Default courses — admin can add more from the admin panel (stored in Firestore 'courses' collection)
+export const DEFAULT_NURSING_COURSES = [
+  { id: 'anatomy',              label: 'Anatomy',                     icon: '🦴' },
+  { id: 'physiology',           label: 'Physiology',                  icon: '🫀' },
+  { id: 'medical_surgical',     label: 'Medical Surgical Nursing',    icon: '🏥' },
+  { id: 'pharmacology',         label: 'Pharmacology',                icon: '💊' },
+  { id: 'fundamentals',         label: 'Fundamentals of Nursing',     icon: '📋' },
+  { id: 'maternal_child',       label: 'Maternal & Child Health',     icon: '👶' },
+  { id: 'community_health',     label: 'Community Health Nursing',    icon: '🌍' },
+  { id: 'psychiatric_nursing',  label: 'Psychiatric Nursing',         icon: '🧠' },
+  { id: 'nutrition',            label: 'Nutrition & Dietetics',       icon: '🥗' },
+  { id: 'microbiology',         label: 'Microbiology & Parasitology', icon: '🦠' },
 ];
 
 export const SUBJECTS_BY_CATEGORY = {
